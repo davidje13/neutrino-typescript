@@ -30,7 +30,8 @@ This follows the configuration suggested in
        "resolveJsonModule": true
      },
      "include": [
-       "src"
+       "src",
+       "test"
      ]
    }
    ```
