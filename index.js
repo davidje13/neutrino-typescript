@@ -1,14 +1,14 @@
 const applyNeutrinoPatches = require('neutrino-patch');
 
 function hasEntryContaining(list, check) {
-  const c = Array.isArray(check) ? check[0] : check;
   return list
     .map((v) => Array.isArray(v) ? v[0] : v)
-    .some((x) => x.includes(c));
+    .some((x) => x.includes(check[0]));
 }
 
 function addIfAbsent(list, entry) {
   if (!hasEntryContaining(list, entry)) {
+    entry[0] = require.resolve(entry[0]);
     list.push(entry);
   }
 }
