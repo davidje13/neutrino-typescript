@@ -1,6 +1,6 @@
 {
   "name": "neutrino-typescript",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Typescript transpilation for neutrino projects",
   "files": [
     "index.js"
