@@ -22,10 +22,10 @@
   },
   "homepage": "https://github.com/davidje13/neutrino-typescript#readme",
   "dependencies": {
-    "@babel/plugin-proposal-class-properties": "^7.4.4",
-    "@babel/plugin-proposal-object-rest-spread": "^7.5.4",
-    "@babel/preset-typescript": "^7.3.3",
-    "neutrino-patch": "git+https://github.com/davidje13/neutrino-patch#semver:^1.0.0"
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/plugin-proposal-object-rest-spread": "^7.6.2",
+    "@babel/preset-typescript": "^7.6.0",
+    "neutrino-patch": "git+https://github.com/davidje13/neutrino-patch#semver:^1.0.1"
   },
   "peerDependencies": {
     "typescript": "3.x"
