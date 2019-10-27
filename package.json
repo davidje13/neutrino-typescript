@@ -3,7 +3,8 @@
   "version": "1.0.4",
   "description": "Typescript transpilation for neutrino projects",
   "files": [
-    "index.js"
+    "index.js",
+    "generateDeclaration.js"
   ],
   "main": "index.js",
   "scripts": {},
