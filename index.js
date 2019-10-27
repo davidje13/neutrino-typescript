@@ -1,4 +1,5 @@
 const applyNeutrinoPatches = require('neutrino-patch');
+const generateDeclaration = require('./generateDeclaration');
 
 function hasEntryContaining(list, check) {
   return list
@@ -13,7 +14,10 @@ function addIfAbsent(list, entry) {
   }
 }
 
-module.exports = () => (neutrino) => {
+module.exports = ({
+  declaration = false,
+  declarationMap = true,
+} = {}) => (neutrino) => {
   applyNeutrinoPatches(neutrino);
 
   neutrino.addSupportedExtensions('ts', 'tsx');
@@ -23,4 +27,14 @@ module.exports = () => (neutrino) => {
     addIfAbsent(options.plugins, ['@babel/plugin-proposal-object-rest-spread', {}]);
     return options;
   });
+
+  if (declaration) {
+    neutrino.config.plugin('emitTypescriptDeclaration').use({
+      apply: (compiler) => {
+        compiler.hooks.afterEmit.tap('GenerateTypescriptDeclatation', () => {
+          generateDeclaration(neutrino, declarationMap);
+        });
+      },
+    });
+  }
 };

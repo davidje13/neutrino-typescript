@@ -74,6 +74,17 @@ This follows the configuration suggested in
    },
    ```
 
+### Generating declaration (`.d.ts`) files
+
+If you are creating a library, you probably want to include a `.d.ts` file.
+This can be turned on by specifying `typescript({ declaration: true })` in
+your `.neutrinorc.js` file. By default, this will also generate a sourcemap.
+You can disable this by setting `declarationMap: false`.
+
+One declaration file will be generated for each entrypoint you have specified
+in `mains`. The file will be named to match the input file (for default
+neutrino configuration, this means you will get `build/index.d.ts`).
+
 ## Linting with ESLint
 
 If you want to use eslint with typescript, you can install the
