@@ -10,7 +10,7 @@ This follows the configuration suggested in
 1. Install dependencies:
 
    ```bash
-   npm install --save-dev git+https://github.com/davidje13/neutrino-typescript#semver:^1.0.7
+   npm install --save-dev git+https://github.com/davidje13/neutrino-typescript#semver:^1.0.8
    npm install --save-dev typescript
    ```
 
