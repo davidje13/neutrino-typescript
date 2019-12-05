@@ -4,7 +4,7 @@ const generateDeclaration = require('./generateDeclaration');
 function hasEntryContaining(list, check) {
   return list
     .map((v) => Array.isArray(v) ? v[0] : v)
-    .some((x) => x.includes(check[0]));
+    .some((x) => x.includes(require.resolve(check[0])));
 }
 
 function addIfAbsent(list, entry) {
