@@ -1,15 +1,16 @@
 const applyNeutrinoPatches = require('neutrino-patch');
 const generateDeclaration = require('./generateDeclaration');
 
-function hasEntryContaining(list, check) {
+function hasEntry(list, resolvedPath) {
   return list
     .map((v) => Array.isArray(v) ? v[0] : v)
-    .some((x) => x.includes(require.resolve(check[0])));
+    .includes(resolvedPath);
 }
 
 function addIfAbsent(list, entry) {
-  if (!hasEntryContaining(list, entry)) {
-    entry[0] = require.resolve(entry[0]);
+  entry[0] = require.resolve(entry[0]);
+
+  if (!hasEntry(list, entry[0])) {
     list.push(entry);
   }
 }
