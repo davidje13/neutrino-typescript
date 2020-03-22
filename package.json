@@ -23,12 +23,12 @@
   },
   "homepage": "https://github.com/davidje13/neutrino-typescript#readme",
   "dependencies": {
-    "@babel/plugin-proposal-class-properties": "^7.7.4",
-    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.7.4",
-    "@babel/plugin-proposal-object-rest-spread": "^7.7.4",
-    "@babel/plugin-proposal-optional-chaining": "^7.7.5",
-    "@babel/preset-typescript": "^7.7.4",
-    "neutrino-patch": "git+https://github.com/davidje13/neutrino-patch#semver:^1.0.2"
+    "@babel/plugin-proposal-class-properties": "7.x",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "7.x",
+    "@babel/plugin-proposal-object-rest-spread": "7.x",
+    "@babel/plugin-proposal-optional-chaining": "7.x",
+    "@babel/preset-typescript": "7.x",
+    "neutrino-patch": "git+https://github.com/davidje13/neutrino-patch#semver:^1.0.3"
   },
   "peerDependencies": {
     "typescript": "3.x"
