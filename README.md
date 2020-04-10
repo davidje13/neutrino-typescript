@@ -10,7 +10,7 @@ This follows the configuration suggested in
 1. Install dependencies:
 
    ```bash
-   npm install --save-dev git+https://github.com/davidje13/neutrino-typescript#semver:^1.0.10
+   npm install --save-dev git+https://github.com/davidje13/neutrino-typescript#semver:^1.0.11
    npm install --save-dev typescript
    ```
 
@@ -25,6 +25,7 @@ This follows the configuration suggested in
        "allowJs": true,
        "noEmit": true,
        "strict": true,
+       "jsx": "preserve",
        "isolatedModules": true,
        "esModuleInterop": true,
        "resolveJsonModule": true
@@ -36,8 +37,13 @@ This follows the configuration suggested in
    }
    ```
 
-   _Note: You should list all your source / test folders in `include`.
-   You can also set `strict` to false if preferred._
+   Notes:
+   - You should list all your source / test folders in `include`.
+   - You can set `strict` to false if preferred.
+   - You can set `allowJs` to false if preferred.
+   - If you are using JSX with preact you can set `"jsxFactory": "h"`.
+   - If you want to define custom type declarations for dependencies,
+     set `"typeRoots": ["src/types", "node_modules/@types"]` (or similar)
 
 3. Include in `.neutrinorc.js`:
 
