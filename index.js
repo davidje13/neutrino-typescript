@@ -14,10 +14,12 @@ function addIfAbsent(list, entry) {
 }
 
 function getConfig(list, name) {
-  const entry = findEntry(list, require.resolve(name));
-  if (Array.isArray(entry) && entry.length > 1) {
-    return entry[1];
-  }
+  try {
+    const entry = findEntry(list, require.resolve(name));
+    if (Array.isArray(entry) && entry.length > 1) {
+      return entry[1];
+    }
+  } catch (ignore) {}
   return {};
 }
 
