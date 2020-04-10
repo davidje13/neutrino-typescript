@@ -1,18 +1,24 @@
 const applyNeutrinoPatches = require('neutrino-patch');
 const generateDeclaration = require('./generateDeclaration');
 
-function hasEntry(list, resolvedPath) {
-  return list
-    .map((v) => Array.isArray(v) ? v[0] : v)
-    .includes(resolvedPath);
+function findEntry(list, resolvedPath) {
+  return list.find((v) => (Array.isArray(v) ? v[0] : v) === resolvedPath);
 }
 
 function addIfAbsent(list, entry) {
   entry[0] = require.resolve(entry[0]);
 
-  if (!hasEntry(list, entry[0])) {
+  if (!findEntry(list, entry[0])) {
     list.push(entry);
   }
+}
+
+function getConfig(list, name) {
+  const entry = findEntry(list, require.resolve(name));
+  if (Array.isArray(entry) && entry.length > 1) {
+    return entry[1];
+  }
+  return {};
 }
 
 module.exports = ({
@@ -20,12 +26,22 @@ module.exports = ({
   declarationMap = true,
   looseProperties = false,
   looseNullCheck = false,
+  jsxPragma = null,
+  onlyRemoveTypeImports = false,
 } = {}) => (neutrino) => {
   applyNeutrinoPatches(neutrino);
 
   neutrino.addSupportedExtensions('ts', 'tsx');
   neutrino.tapAtEnd('compile', 'babel', (options) => {
-    addIfAbsent(options.presets, ['@babel/preset-typescript', {}]);
+    let resolvedJsxPragma = jsxPragma;
+    if (resolvedJsxPragma === null) {
+      const jsxConfig = getConfig(options.plugins, '@babel/plugin-transform-react-jsx');
+      resolvedJsxPragma = jsxConfig.pragma || 'React';
+    }
+    addIfAbsent(options.presets, ['@babel/preset-typescript', {
+      jsxPragma: resolvedJsxPragma,
+      onlyRemoveTypeImports,
+    }]);
     addIfAbsent(options.plugins, ['@babel/plugin-proposal-class-properties', { loose: looseProperties }]);
     addIfAbsent(options.plugins, ['@babel/plugin-proposal-nullish-coalescing-operator', { loose: looseNullCheck }]);
     addIfAbsent(options.plugins, ['@babel/plugin-proposal-object-rest-spread', {
