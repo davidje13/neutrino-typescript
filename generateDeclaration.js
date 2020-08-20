@@ -12,7 +12,6 @@ module.exports = function(neutrino, declarationMap) {
   const options = {
     ...rawOptions,
     noEmit: false, // this might not be needed any more
-    isolatedModules: false, // https://github.com/microsoft/TypeScript/issues/29490 (fixed in 3.6.4+)
     declaration: true,
     emitDeclarationOnly: true,
     declarationMap,

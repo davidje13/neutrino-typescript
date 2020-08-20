@@ -35,17 +35,15 @@ module.exports = ({
 
   neutrino.addSupportedExtensions('ts', 'tsx');
   neutrino.tapAtEnd('compile', 'babel', (options) => {
-    let resolvedJsxPragma = jsxPragma;
-    if (resolvedJsxPragma === null) {
-      const jsxConfig = getConfig(options.plugins, '@babel/plugin-transform-react-jsx');
-      resolvedJsxPragma = jsxConfig.pragma || 'React';
-    }
+    const jsxConfig = getConfig(options.plugins, '@babel/plugin-transform-react-jsx');
+    const resolvedJsxPragma = jsxPragma || jsxConfig.pragma || 'React';
     addIfAbsent(options.presets, ['@babel/preset-typescript', {
       jsxPragma: resolvedJsxPragma,
       onlyRemoveTypeImports,
     }]);
     addIfAbsent(options.plugins, ['@babel/plugin-proposal-class-properties', { loose: looseProperties }]);
     addIfAbsent(options.plugins, ['@babel/plugin-proposal-nullish-coalescing-operator', { loose: looseNullCheck }]);
+    addIfAbsent(options.plugins, ['@babel/plugin-proposal-logical-assignment-operators']);
     addIfAbsent(options.plugins, ['@babel/plugin-proposal-object-rest-spread', {
       loose: looseProperties,
       useBuiltIns: looseProperties,
