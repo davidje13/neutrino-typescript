@@ -1,5 +1,5 @@
 {
-  "name": "neutrino-typescript",
+  "name": "neutrinojs-typescript",
   "version": "1.0.13",
   "description": "Typescript transpilation for neutrino projects",
   "files": [
@@ -29,7 +29,7 @@
     "@babel/plugin-proposal-object-rest-spread": "7.x",
     "@babel/plugin-proposal-optional-chaining": "7.x",
     "@babel/preset-typescript": "7.x",
-    "neutrino-patch": "git+https://github.com/davidje13/neutrino-patch#semver:^1.0.3"
+    "neutrino-patch": "1.x"
   },
   "peerDependencies": {
     "typescript": "^3.6.4 || 4.x"

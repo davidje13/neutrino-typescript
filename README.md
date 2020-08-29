@@ -10,9 +10,11 @@ This follows the configuration suggested in
 1. Install dependencies:
 
    ```bash
-   npm install --save-dev git+https://github.com/davidje13/neutrino-typescript#semver:^1.0.13
+   npm install --save-dev neutrinojs-typescript
    npm install --save-dev typescript
    ```
+
+   (note that `neutrino-typescript` in NPM - without `js` - is an unrelated package which is unmaintained).
 
 2. Create `tsconfig.json`:
 
@@ -48,7 +50,7 @@ This follows the configuration suggested in
 3. Include in `.neutrinorc.js`:
 
    ```javascript
-   const typescript = require('neutrino-typescript');
+   const typescript = require('neutrinojs-typescript');
    // ...
 
    module.exports = {
@@ -94,7 +96,7 @@ neutrino configuration, this means you will get `build/index.d.ts`).
 ## Linting with ESLint
 
 If you want to use eslint with typescript, you can install the
-[neutrino-typescript-eslint](https://github.com/davidje13/neutrino-typescript-eslint#readme) module.
+[neutrinojs-typescript-eslint](https://github.com/davidje13/neutrino-typescript-eslint#readme) module.
 
 ## Testing with Jest
 
