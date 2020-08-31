@@ -22,7 +22,7 @@ function getConfig(list, name) {
       return entry[1];
     }
   } catch (ignore) {}
-  return {};
+  return null;
 }
 
 function regexToGlob(glob) {
@@ -63,7 +63,7 @@ module.exports = ({
   applyNeutrinoPatches(neutrino);
 
   function getJsxPragma(options) {
-    const jsxConfig = getConfig(options.plugins, '@babel/plugin-transform-react-jsx');
+    const jsxConfig = getConfig(options.plugins, '@babel/plugin-transform-react-jsx') || {};
     const pragma = compilerOptions.jsxFactory || jsxConfig.pragma || 'React.createElement';
     const base = /^[^.]*/.exec(pragma)[0];
     const pragmaFrag = compilerOptions.jsxFragmentFactory || jsxConfig.pragmaFrag || `${base}.Fragment`;
@@ -103,10 +103,14 @@ module.exports = ({
     const options = compileRule ? compileRule.use('babel').get('options') : {};
     const resolvedJsxPragma = getJsxPragma(options);
 
+    const transformJsx = Boolean(getConfig(options.plugins, '@babel/plugin-transform-react-jsx'));
+    const preserveJsx = Boolean(getConfig(options.plugins, '@babel/plugin-syntax-jsx'));
+
     return {
       ...tsconfig,
       compilerOptions: {
         ...compilerOptions,
+        jsx: (transformJsx || preserveJsx) ? 'preserve' : undefined,
         jsxFactory: unless(resolvedJsxPragma.pragma, 'React.createElement'),
         jsxFragmentFactory: unless(resolvedJsxPragma.pragmaFrag, 'React.Fragment'),
 
