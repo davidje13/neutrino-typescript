@@ -25,27 +25,32 @@ function getConfig(list, name) {
   return null;
 }
 
-function regexToGlob(glob) {
-  // convert trivial regexes to globs
-  let v = glob
-    .replace(/\\(.)/g, (_, [v]) => `(--escaped${v.charCodeAt(0)}--)`)
-    .replace(/\(/g, '@(');
+function regexToPaths(regex) {
+  // convert trivial regexes to lists of paths for tsconfig compatibility
+  // supports abc(def|ghi)jkl style regexes
+  // anything more complex probably won't work
+  // tsconfig supports basic glob patterns, but seems to be very limited in what they can do
+  // (no support for {a,b} or @(a|b) etc.
 
-  // convert all @(x)* to *(x), etc.
-  for (let i = 0; i < 100; ++ i) {
-    const oldV = v;
-    v = v.replace(/^(.*)@\(([^()]+)\)(\*|\+|\?)(?!\()/g, '$1$3($2)');
-    if (v === oldV) {
-      break;
+  let patterns = [regex];
+  for (let i = 0, changed = true; i < 100 && changed; ++ i) {
+    const nextPatterns = [];
+    changed = false;
+    for (const pattern of patterns) {
+      const match = /^(.*)\(([^()]+)\)(.*)$/.exec(pattern);
+      if (match) {
+        const choices = match[2].split('|');
+        for (const choice of choices) {
+          nextPatterns.push(match[1] + choice + match[3]);
+        }
+        changed = true;
+        continue;
+      }
+      nextPatterns.push(pattern);
     }
+    patterns = nextPatterns;
   }
-
-  return v
-    .replace(/([^)])\*(?!\()/g, (_, [c]) => (c === '.' ? '*' : `*(${c})`))
-    .replace(/([^)])\+(?!\()/g, (_, [c]) => (c === '.' ? '?*' : `+(${c})`))
-    .replace(/([^)])\?(?!\()/g, '?($1)')
-    .replace(/\./g, '?')
-    .replace(/--escaped([^-]+)--/g, (_, [v]) => String.fromCharCode(v));
+  return patterns;
 }
 
 function unless(value, check) {
@@ -125,10 +130,9 @@ module.exports = ({
         declarationMap: undefined,
       },
       include: Array.from(new Set([
-        // format: https://www.npmjs.com/package/glob
         ...tsconfig.include || [],
-        regexToGlob(relative(process.cwd(), neutrino.options.source)),
-        regexToGlob(relative(process.cwd(), neutrino.options.tests)),
+        ...regexToPaths(relative(process.cwd(), neutrino.options.source)),
+        ...regexToPaths(relative(process.cwd(), neutrino.options.tests)),
       ])),
     };
   });
