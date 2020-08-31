@@ -84,7 +84,7 @@ function getCompilerOptions(tsconfig, deprecated) {
       ', or specify neither for auto-discovery',
     );
     if (compilerOptions.jsxFactory === undefined) {
-      compilerOptions.jsxFactory = deprecated.jsxPragma;
+      compilerOptions.jsxFactory = deprecated.jsxPragma + '.createElement';
     }
   }
 

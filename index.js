@@ -103,14 +103,20 @@ module.exports = ({
     const options = compileRule ? compileRule.use('babel').get('options') : {};
     const resolvedJsxPragma = getJsxPragma(options);
 
-    const transformJsx = Boolean(getConfig(options.plugins, '@babel/plugin-transform-react-jsx'));
-    const preserveJsx = Boolean(getConfig(options.plugins, '@babel/plugin-syntax-jsx'));
+    // TODO: currently have to check presets as well as plugins because presets can include plugins
+    // - would be better if we could resolve the final list of plugins; maybe @babel/core has an API for this?
+    const useJsx = (
+      Boolean(getConfig(options.plugins, '@babel/plugin-transform-react-jsx')) ||
+      Boolean(getConfig(options.plugins, '@babel/plugin-syntax-jsx')) ||
+      Boolean(getConfig(options.presets, '@babel/preset-react')) ||
+      (compilerOptions.jsxFactory !== undefined) // escape hatch if auto-detection fails
+    );
 
     return {
       ...tsconfig,
       compilerOptions: {
         ...compilerOptions,
-        jsx: (transformJsx || preserveJsx) ? 'preserve' : undefined,
+        jsx: useJsx ? 'preserve' : undefined,
         jsxFactory: unless(resolvedJsxPragma.pragma, 'React.createElement'),
         jsxFragmentFactory: unless(resolvedJsxPragma.pragmaFrag, 'React.Fragment'),
 
