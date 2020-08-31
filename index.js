@@ -1,5 +1,7 @@
+const { relative } = require('path');
 const applyNeutrinoPatches = require('neutrino-patch');
 const generateDeclaration = require('./generateDeclaration');
+const { getCompilerOptions } = require('./compilerOptions');
 
 function findEntry(list, resolvedPath) {
   return list.find((v) => (Array.isArray(v) ? v[0] : v) === resolvedPath);
@@ -23,23 +25,57 @@ function getConfig(list, name) {
   return {};
 }
 
+function regexToGlob(glob) {
+  // convert trivial regexes to globs
+  let v = glob
+    .replace(/\\(.)/g, (_, [v]) => `(--escaped${v.charCodeAt(0)}--)`)
+    .replace(/\(/g, '@(');
+
+  // convert all @(x)* to *(x), etc.
+  for (let i = 0; i < 100; ++ i) {
+    const oldV = v;
+    v = v.replace(/^(.*)@\(([^()]+)\)(\*|\+|\?)(?!\()/g, '$1$3($2)');
+    if (v === oldV) {
+      break;
+    }
+  }
+
+  return v
+    .replace(/([^)])\*(?!\()/g, (_, [c]) => (c === '.' ? '*' : `*(${c})`))
+    .replace(/([^)])\+(?!\()/g, (_, [c]) => (c === '.' ? '?*' : `+(${c})`))
+    .replace(/([^)])\?(?!\()/g, '?($1)')
+    .replace(/\./g, '?')
+    .replace(/--escaped([^-]+)--/g, (_, [v]) => String.fromCharCode(v));
+}
+
+function unless(value, check) {
+  return (value === check) ? undefined : value;
+}
+
 module.exports = ({
-  declaration = false,
-  declarationMap = true,
   looseProperties = false,
   looseNullCheck = false,
-  jsxPragma = null,
-  onlyRemoveTypeImports = false,
+  tsconfig = {},
+  ...deprecatedOptions
 } = {}) => (neutrino) => {
+  const compilerOptions = getCompilerOptions(tsconfig, deprecatedOptions);
+
   applyNeutrinoPatches(neutrino);
+
+  function getJsxPragma(options) {
+    const jsxConfig = getConfig(options.plugins, '@babel/plugin-transform-react-jsx');
+    const pragma = compilerOptions.jsxFactory || jsxConfig.pragma || 'React.createElement';
+    const base = /^[^.]*/.exec(pragma)[0];
+    const pragmaFrag = compilerOptions.jsxFragmentFactory || jsxConfig.pragmaFrag || `${base}.Fragment`;
+    return { base, pragma, pragmaFrag };
+  }
 
   neutrino.addSupportedExtensions('ts', 'tsx');
   neutrino.tapAtEnd('compile', 'babel', (options) => {
-    const jsxConfig = getConfig(options.plugins, '@babel/plugin-transform-react-jsx');
-    const resolvedJsxPragma = jsxPragma || jsxConfig.pragma || 'React';
+    const resolvedJsxPragma = getJsxPragma(options);
     addIfAbsent(options.presets, ['@babel/preset-typescript', {
-      jsxPragma: resolvedJsxPragma,
-      onlyRemoveTypeImports,
+      jsxPragma: resolvedJsxPragma.base,
+      onlyRemoveTypeImports: (compilerOptions.importsNotUsedAsValues !== 'remove'),
     }]);
     addIfAbsent(options.plugins, ['@babel/plugin-proposal-class-properties', { loose: looseProperties }]);
     addIfAbsent(options.plugins, ['@babel/plugin-proposal-nullish-coalescing-operator', { loose: looseNullCheck }]);
@@ -52,13 +88,38 @@ module.exports = ({
     return options;
   });
 
-  if (declaration) {
+  if (compilerOptions.declaration) {
     neutrino.config.plugin('emitTypescriptDeclaration').use({
       apply: (compiler) => {
         compiler.hooks.afterEmit.tap('GenerateTypescriptDeclatation', () => {
-          generateDeclaration(neutrino, declarationMap);
+          generateDeclaration(neutrino, compilerOptions.declarationMap);
         });
       },
     });
   }
+
+  neutrino.register('tsconfig', (neutrino) => {
+    const compileRule = neutrino.config.module.rules.get('compile');
+    const options = compileRule ? compileRule.use('babel').get('options') : {};
+    const resolvedJsxPragma = getJsxPragma(options);
+
+    return {
+      ...tsconfig,
+      compilerOptions: {
+        ...compilerOptions,
+        jsxFactory: unless(resolvedJsxPragma.pragma, 'React.createElement'),
+        jsxFragmentFactory: unless(resolvedJsxPragma.pragmaFrag, 'React.Fragment'),
+
+        // handled elsewhere
+        declaration: undefined,
+        declarationMap: undefined,
+      },
+      include: Array.from(new Set([
+        // format: https://www.npmjs.com/package/glob
+        ...tsconfig.include || [],
+        regexToGlob(relative(process.cwd(), neutrino.options.source)),
+        regexToGlob(relative(process.cwd(), neutrino.options.tests)),
+      ])),
+    };
+  });
 };

@@ -4,8 +4,13 @@
   "description": "Typescript transpilation for neutrino projects",
   "files": [
     "index.js",
-    "generateDeclaration.js"
+    "generateDeclaration.js",
+    "compilerOptions.js",
+    "bin"
   ],
+  "bin": {
+    "rewrite-tsconfig": "./bin/rewrite-tsconfig.js"
+  },
   "main": "index.js",
   "scripts": {},
   "repository": {

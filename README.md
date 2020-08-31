@@ -10,44 +10,12 @@ This follows the configuration suggested in
 1. Install dependencies:
 
    ```bash
-   npm install --save-dev neutrinojs-typescript
-   npm install --save-dev typescript
+   npm install --save-dev neutrinojs-typescript typescript
    ```
 
    (note that `neutrino-typescript` in NPM - without `js` - is an unrelated package which is unmaintained).
 
-2. Create `tsconfig.json`:
-
-   ```json
-   {
-     "compilerOptions": {
-       "target": "esnext",
-       "module": "esnext",
-       "moduleResolution": "node",
-       "allowJs": true,
-       "noEmit": true,
-       "strict": true,
-       "jsx": "preserve",
-       "isolatedModules": true,
-       "esModuleInterop": true,
-       "resolveJsonModule": true
-     },
-     "include": [
-       "src",
-       "test"
-     ]
-   }
-   ```
-
-   Notes:
-   - You should list all your source / test folders in `include`.
-   - You can set `strict` to false if preferred.
-   - You can set `allowJs` to false if preferred.
-   - If you are using JSX with preact you can set `"jsxFactory": "h"`.
-   - If you want to define custom type declarations for dependencies,
-     set `"typeRoots": ["src/types", "node_modules/@types"]` (or similar)
-
-3. Include in `.neutrinorc.js`:
+2. Include in `.neutrinorc.js`:
 
    ```javascript
    const typescript = require('neutrinojs-typescript');
@@ -62,11 +30,13 @@ This follows the configuration suggested in
    };
    ```
 
-4. Include type checking in `package.json` scripts:
+3. Include type checking in `package.json` scripts:
 
    ```json
    {
      "scripts": {
+       "prebuild": "rewrite-tsconfig",
+       "prelint": "rewrite-tsconfig",
        "lint": "tsc"
      }
    },
@@ -77,17 +47,88 @@ This follows the configuration suggested in
    ```json
    {
      "scripts": {
+       "prebuild": "rewrite-tsconfig",
+       "prelint": "rewrite-tsconfig",
        "lint": "existing lint command && tsc"
      }
    },
    ```
 
+4. Run `npm run lint` to create the initial `tsconfig.json` file and test the
+   integration.
+
+### tsconfig.json
+
+A `tsconfig.json` file will be generated automatcially by `rewrite-tsconfig`
+and should be included in your repository. It does not have to be included
+(the `prelint` script will generate it when needed), but including it is
+recommended because many IDEs will look for it to configure their own type
+checking.
+
+If you prefer managing `tsconfig.json` yourself, simply remove
+`rewrite-tsconfig` from your NPM scripts. You will need to ensure it remains
+compatible with the webpack / babel configuration in `.neutrinorc.js`.
+
+If you prefer using [tsconfig.js](https://www.npmjs.com/package/tsconfig.js)
+(or a similar tsconfig-as-code tool), remove `rewrite-tsconfig` from your
+NPM scripts and set the content of `tsconfig.js` to:
+
+```javascript
+const neutrino = require('neutrino');
+
+module.exports = neutrino().tsconfig();
+```
+
+### Customisation
+
+Since `rewrite-tsconfig` replaces any `tsconfig.json` file in the project
+directory. You should specify customisations in `.neutrinorc.js` instead:
+
+```javascript
+const typescript = require('neutrinojs-typescript');
+
+module.exports = {
+  use: [
+    typescript({ tsconfig: {
+      compilerOptions: {
+        strict: true,
+        allowJs: true,
+        importsNotUsedAsValues: 'remove', // legacy behaviour
+        typeRoots: [
+          'src/types', // custom types directory
+          'node_modules/@types',
+        ],
+      },
+      include: ['some-other-dir'], // sources and tests are included by default
+    } }),
+  ],
+};
+```
+
+Some settings cannot be customised due to babel compatibility requirements.
+If you attempt to change those settings, they will be ignored and a warning
+will be printed.
+
 ### Generating declaration (`.d.ts`) files
 
 If you are creating a library, you probably want to include a `.d.ts` file.
-This can be turned on by specifying `typescript({ declaration: true })` in
-your `.neutrinorc.js` file. By default, this will also generate a sourcemap.
-You can disable this by setting `declarationMap: false`.
+This can be turned on by specifying `declaration: true` as normal in the
+tsconfig options:
+
+```javascript
+const typescript = require('neutrinojs-typescript');
+
+module.exports = {
+  use: [
+    typescript({ tsconfig: {
+      compilerOptions: {
+        declaration: true,
+        declarationMap: true, // defaults to true
+      },
+    } }),
+  ],
+};
+```
 
 One declaration file will be generated for each entrypoint you have specified
 in `mains`. The file will be named to match the input file (for default
