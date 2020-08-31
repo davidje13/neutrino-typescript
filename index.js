@@ -18,8 +18,8 @@ function addIfAbsent(list, entry) {
 function getConfig(list, name) {
   try {
     const entry = findEntry(list, require.resolve(name));
-    if (Array.isArray(entry) && entry.length > 1) {
-      return entry[1];
+    if (entry) {
+      return (Array.isArray(entry) && entry.length > 1) ? entry[1] : {};
     }
   } catch (ignore) {}
   return null;
