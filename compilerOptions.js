@@ -41,6 +41,11 @@ const requiredCompilerOptions = {
   sourceRoot: undefined,
 };
 
+const errorDetail = {
+  emitDecoratorMetadata: 'to enable decorator metadata, install and configure babel-plugin-transform-typescript-metadata instead - see https://github.com/davidje13/neutrino-typescript/issues/7 for details',
+  experimentalDecorators: 'to enable decorators, install and configure @babel/plugin-proposal-decorators with {legacy: true} instead - see https://github.com/davidje13/neutrino-typescript/issues/7 for details',
+};
+
 function informDeprecated(oldKey, newKey, value, newValue = value, extra = '') {
   const oldConfig = { [oldKey]: value };
   const newConfig = { tsconfig: { compilerOptions: { [newKey]: newValue } } };
@@ -100,7 +105,9 @@ function getCompilerOptions(tsconfig, deprecated) {
     if (userValue !== undefined) {
       const ignoredConfig = { tsconfig: { compilerOptions: { [k]: userValue } } };
       let info = '';
-      if (fixedValue !== undefined) {
+      if (errorDetail[k]) {
+        info = ` (${errorDetail[k]})`;
+      } else if (fixedValue !== undefined) {
         info = ` (${k} is always ${JSON.stringify(fixedValue)})`;
       }
       console.warn(`typescript(${JSON.stringify(ignoredConfig)}) will be ignored${info}`);

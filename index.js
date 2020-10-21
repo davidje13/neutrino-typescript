@@ -117,6 +117,9 @@ module.exports = ({
       (compilerOptions.jsxFactory !== undefined) // escape hatch if auto-detection fails
     );
 
+    const decorators = Boolean(getConfig(options.plugins, '@babel/plugin-proposal-decorators'));
+    const metadataDecorators = Boolean(getConfig(options.plugins, 'babel-plugin-transform-typescript-metadata'));
+
     return {
       ...tsconfig,
       compilerOptions: {
@@ -124,6 +127,9 @@ module.exports = ({
         jsx: useJsx ? 'preserve' : undefined,
         jsxFactory: unless(resolvedJsxPragma.pragma, 'React.createElement'),
         jsxFragmentFactory: unless(resolvedJsxPragma.pragmaFrag, 'React.Fragment'),
+
+        experimentalDecorators: decorators || undefined,
+        emitDecoratorMetadata: metadataDecorators || undefined,
 
         // handled elsewhere
         declaration: undefined,
