@@ -1,13 +1,27 @@
 const typescript = require('typescript');
+const { statSync } = require('fs');
+const { join } = require('path');
 
 module.exports = function(neutrino, declarationMap) {
   const rawOptions = typescript.getDefaultCompilerOptions();
-  const sources = Object.values(neutrino.options.mains).map((entry) => {
-    if (typeof entry === 'object') {
-      return entry.entry;
-    }
-    return entry;
-  });
+  const sources = Object.values(neutrino.options.mains)
+    .map((entry) => {
+      if (typeof entry === 'object') {
+        return entry.entry;
+      }
+      return entry;
+    })
+    .map((source) => {
+      try {
+        const sourceStat = statSync(source);
+        if (sourceStat.isDirectory()) {
+          return join(source, 'index');
+        }
+      } catch (ignore) {
+        // filenames without extensions are allowed
+      }
+      return source;
+    });
 
   const options = {
     ...rawOptions,
