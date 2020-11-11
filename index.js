@@ -57,6 +57,10 @@ function unless(value, check) {
   return (value === check) ? undefined : value;
 }
 
+function stripUndefined(structure) {
+  return JSON.parse(JSON.stringify(structure));
+}
+
 module.exports = ({
   looseProperties = false,
   looseNullCheck = false,
@@ -120,7 +124,7 @@ module.exports = ({
     const decorators = Boolean(getConfig(options.plugins, '@babel/plugin-proposal-decorators'));
     const metadataDecorators = Boolean(getConfig(options.plugins, 'babel-plugin-transform-typescript-metadata'));
 
-    return {
+    return stripUndefined({
       ...tsconfig,
       compilerOptions: {
         ...compilerOptions,
@@ -140,6 +144,6 @@ module.exports = ({
         ...regexToPaths(relative(process.cwd(), neutrino.options.source)),
         ...regexToPaths(relative(process.cwd(), neutrino.options.tests)),
       ])),
-    };
+    });
   });
 };

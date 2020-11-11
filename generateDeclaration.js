@@ -3,7 +3,8 @@ const { statSync } = require('fs');
 const { join } = require('path');
 
 module.exports = function(neutrino, declarationMap) {
-  const rawOptions = typescript.getDefaultCompilerOptions();
+  const tsconfig = neutrino.outputHandlers.get('tsconfig')(neutrino);
+  const rawOptions = typescript.convertCompilerOptionsFromJson(tsconfig.compilerOptions).options;
   const sources = Object.values(neutrino.options.mains)
     .map((entry) => {
       if (typeof entry === 'object') {
