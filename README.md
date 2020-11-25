@@ -59,7 +59,7 @@ This follows the configuration suggested in
 
 ### tsconfig.json
 
-A `tsconfig.json` file will be generated automatcially by `rewrite-tsconfig`
+A `tsconfig.json` file will be generated automatically by `rewrite-tsconfig`
 and should be included in your repository. It does not have to be included
 (the `prelint` script will generate it when needed), but including it is
 recommended because many IDEs will look for it to configure their own type
